@@ -17,9 +17,9 @@ const app = express();
 
 const corsOptions = {
   origin: [
-    "http://nivabeats.com",
-    "http://admin.nivabeats.com",
-    "http://api.nivabeats.com",
+    "https://nivabeats.netlify.app/",
+    "https://admin-nivabeats.netlify.app",
+    "https://api-nivabeats-com.onrender.com",
   ], // Allow both ports
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
