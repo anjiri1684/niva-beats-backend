@@ -17,8 +17,9 @@ const app = express();
 
 const corsOptions = {
   origin: [
-    "https://admin-nivabeats.onrender.com",
-    "https://user-frontend-7o7u.onrender.com",
+    "http://nivabeats.com",
+    "http://admin.nivabeats.com",
+    "http://api.nivabeats.com",
   ], // Allow both ports
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
