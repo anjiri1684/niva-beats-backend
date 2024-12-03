@@ -195,31 +195,34 @@ const loginAdmin = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    console.log("Login attempt for admin:", email);
+    console.log("Admin login attempt:", email);
 
+    // Check if the user exists and is an admin
     const admin = await User.findOne({ email });
     if (!admin || admin.role !== "admin") {
-      return res
-        .status(401)
-        .json({ message: "Invalid credentials or not an admin." });
+      return res.status(401).json({ message: "Invalid login credentials." });
     }
 
-    const validPassword = await bcrypt.compare(password, admin.password);
-    if (!validPassword) {
-      return res.status(401).json({ message: "Invalid credentials." });
+    // Validate the password
+    const isPasswordValid = await bcrypt.compare(password, admin.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid login credentials." });
     }
 
+    // Generate JWT
     const token = jwt.sign(
-      { id: admin._id, email: admin.email, role: "admin" },
+      { id: admin._id, email: admin.email, role: admin.role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    console.log("Admin logged in successfully:", email);
+    console.log("Admin successfully logged in:", email);
     res.status(200).json({ message: "Login successful", token });
   } catch (error) {
-    console.error("Error logging in admin:", error);
-    res.status(500).json({ message: "Error logging in" });
+    console.error("Error logging in admin:", error.message);
+
+    // Avoid sending sensitive error details to the client
+    res.status(500).json({ message: "An unexpected error occurred." });
   }
 };
 
