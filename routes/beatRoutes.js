@@ -1,8 +1,8 @@
-// beatRoutes.js
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 const Beat = require("../models/Beat");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Use your Stripe secret key
 const { createPaymentIntent } = require("./paymentRoutes"); // Import createPaymentIntent
@@ -13,6 +13,9 @@ const storage = multer.diskStorage({
     const folder = file.mimetype.startsWith("audio")
       ? "uploads/audio"
       : "uploads/images";
+
+    // Ensure folder exists or create it
+    fs.mkdirSync(folder, { recursive: true });
     cb(null, folder);
   },
   filename: (req, file, cb) =>
@@ -21,10 +24,24 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit for file uploads
   fileFilter: (req, file, cb) => {
-    const isValid =
-      file.mimetype.startsWith("audio") || file.mimetype.startsWith("image");
-    isValid ? cb(null, true) : cb(new Error("Invalid file type"), false);
+    const validMimeTypes = [
+      "audio/mpeg",
+      "audio/wav",
+      "image/jpeg",
+      "image/png",
+    ];
+    if (validMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error(
+          "Invalid file type. Only MP3, WAV, JPEG, and PNG are allowed."
+        ),
+        false
+      );
+    }
   },
 });
 
@@ -34,15 +51,15 @@ router.post(
   upload.fields([{ name: "audioFile" }, { name: "image" }]),
   async (req, res) => {
     try {
+      if (!req.files || !req.files.audioFile || !req.files.image) {
+        return res
+          .status(400)
+          .json({ error: "Audio and Image files are required." });
+      }
+
       // Construct URLs for the audio and image files
-      const audioFileUrl = `${req.protocol}://${req.get(
-        "host"
-      )}/uploads/audio/${req.files["audioFile"][0].filename}`;
-      const imageUrl = req.files["image"]
-        ? `${req.protocol}://${req.get("host")}/uploads/images/${
-            req.files["image"][0].filename
-          }`
-        : null;
+      const audioFileUrl = `/uploads/audio/${req.files["audioFile"][0].filename}`;
+      const imageUrl = `/uploads/images/${req.files["image"][0].filename}`;
 
       // Create a new beat entry in MongoDB
       const newBeat = new Beat({
@@ -59,7 +76,7 @@ router.post(
         .status(201)
         .json({ message: "Beat uploaded successfully!", beat: newBeat });
     } catch (error) {
-      console.error(error);
+      console.error("File upload error:", error);
       res
         .status(500)
         .json({ error: "Error uploading beat. Please try again." });
@@ -79,7 +96,6 @@ router.get("/", async (req, res) => {
 });
 
 // Checkout route
-
 // Route for creating a payment intent
 router.post("/create-payment-intent", async (req, res) => {
   const { beatIds } = req.body;
