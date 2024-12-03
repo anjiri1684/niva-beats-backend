@@ -16,11 +16,7 @@ const userRoutes = require("./routes/userRoutes");
 const app = express();
 
 const corsOptions = {
-  origin: [
-    "https://nivabeats.netlify.app/",
-    "https://admin-nivabeats.netlify.app",
-    "https://niva-beats-backend.onrender.com",
-  ], // Allow both ports
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
