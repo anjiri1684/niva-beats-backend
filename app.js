@@ -19,7 +19,7 @@ const corsOptions = {
   origin: [
     "https://nivabeats.netlify.app/",
     "https://admin-nivabeats.netlify.app",
-    "https://api-nivabeats-com.onrender.com",
+    "https://niva-beats-backend.onrender.com",
   ], // Allow both ports
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
