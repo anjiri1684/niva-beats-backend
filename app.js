@@ -16,7 +16,11 @@ const userRoutes = require("./routes/userRoutes");
 const app = express();
 
 const corsOptions = {
-  origin: "*",
+  origin: [
+    "https://admin.nivabeats.com",
+    "https://nivabeats.com",
+    "https://niva-beats-backend.vercel.app/",
+  ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
