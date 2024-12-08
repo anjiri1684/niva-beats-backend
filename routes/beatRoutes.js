@@ -20,9 +20,33 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + path.extname(file.originalname)),
 });
 
+// const upload = multer({
+//   storage,
+//   limits: { fileSize: 200 * 1024 * 1024 }, // 50MB file size limit
+//   fileFilter: (req, file, cb) => {
+//     const validMimeTypes = [
+//       "audio/mpeg",
+//       "audio/wav",
+//       "image/jpeg",
+//       "image/png",
+//     ];
+//     if (validMimeTypes.includes(file.mimetype)) {
+//       cb(null, true);
+//     } else {
+//       cb(
+//         new Error(
+//           "Invalid file type. Only MP3, WAV, JPEG, and PNG are allowed."
+//         ),
+//         false
+//       );
+//     }
+//   },
+// });
+
+// Upload beat route
 const upload = multer({
   storage,
-  limits: { fileSize: 200 * 1024 * 1024 }, // 50MB file size limit
+  limits: { fileSize: 200 * 1024 * 1024 }, // 200MB limit
   fileFilter: (req, file, cb) => {
     const validMimeTypes = [
       "audio/mpeg",
@@ -43,7 +67,6 @@ const upload = multer({
   },
 });
 
-// Upload beat route
 router.post(
   "/upload",
   upload.fields([{ name: "audioFile" }, { name: "image" }]),
