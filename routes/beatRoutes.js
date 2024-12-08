@@ -68,6 +68,8 @@ router.post("/upload", upload, async (req, res) => {
     res
       .status(201)
       .json({ message: "Beat uploaded successfully!", beat: newBeat });
+    console.log("Received audio file:", req.files.audioFile);
+    console.log("Received image file:", req.files.image);
   } catch (error) {
     console.error("Error uploading beat:", error);
     if (error.code === "LIMIT_FILE_SIZE") {
