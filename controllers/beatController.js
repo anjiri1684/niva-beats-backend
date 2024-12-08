@@ -32,10 +32,13 @@ exports.uploadBeat = async (req, res) => {
     await beat.save();
     res.status(201).json({ message: "Beat uploaded successfully", beat });
   } catch (error) {
-    console.error("Error uploading beat:", error.message);
+    console.error("Error uploading beat:", error.stack); // Log error stack
     res
       .status(500)
-      .json({ message: "Error uploading beat. Please try again." });
+      .json({
+        message: "Error uploading beat. Please try again.",
+        error: error.message,
+      });
   }
 };
 
