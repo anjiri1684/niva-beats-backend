@@ -19,7 +19,7 @@ const corsOptions = {
   origin: [
     "https://admin.nivabeats.com",
     "https://nivabeats.com",
-    "https://niva-beats-backend.vercel.app/",
+    "https://niva-beats-backend.vercel.app",
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
