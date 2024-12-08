@@ -1,18 +1,16 @@
 const express = require("express");
 const router = express.Router();
-const cloudinary = require("cloudinary").v2; // Import Cloudinary
+const cloudinary = require("cloudinary").v2;
 const Beat = require("../models/Beat");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { v4: uuidv4 } = require("uuid");
 
-// Configure Cloudinary with your credentials (set these in your .env file)
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Upload route
 router.post("/upload", async (req, res) => {
   try {
     const { title, artist, genre, price } = req.body;
@@ -28,8 +26,8 @@ router.post("/upload", async (req, res) => {
     const audioUploadResponse = await cloudinary.uploader.upload(
       audioFile[0].path,
       {
-        resource_type: "auto", // Automatically detects whether it's an image or audio
-        public_id: uuidv4(), // Generates a unique ID for each file
+        resource_type: "auto",
+        public_id: uuidv4(),
       }
     );
 
@@ -37,16 +35,14 @@ router.post("/upload", async (req, res) => {
     const imageUploadResponse = await cloudinary.uploader.upload(
       image[0].path,
       {
-        folder: "beats/images", // Organize images into a folder
-        public_id: uuidv4(), // Unique ID for the image
+        folder: "beats/images",
+        public_id: uuidv4(),
       }
     );
 
-    // Construct URLs for the audio and image files
     const audioFileUrl = audioUploadResponse.secure_url;
     const imageUrl = imageUploadResponse.secure_url;
 
-    // Create a new beat entry in MongoDB
     const newBeat = new Beat({
       title,
       artist,
@@ -66,7 +62,6 @@ router.post("/upload", async (req, res) => {
   }
 });
 
-// Get all beats route
 router.get("/", async (req, res) => {
   try {
     const beats = await Beat.find().sort({ createdAt: -1 });
@@ -77,7 +72,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Checkout route for creating a payment intent
 router.post("/create-payment-intent", async (req, res) => {
   const { beatIds } = req.body;
 
@@ -94,10 +88,8 @@ router.post("/create-payment-intent", async (req, res) => {
         .json({ error: "No beats found for the provided IDs." });
     }
 
-    // Calculate total price dynamically
     const totalPrice = beats.reduce((sum, beat) => sum + beat.price, 0);
 
-    // Create payment intent with Stripe
     const paymentIntent = await stripe.paymentIntents.create({
       amount: totalPrice * 100, // Convert to cents
       currency: "usd",
@@ -114,7 +106,6 @@ router.post("/create-payment-intent", async (req, res) => {
   }
 });
 
-// Add error handling middleware
 router.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: "Internal Server Error" });
