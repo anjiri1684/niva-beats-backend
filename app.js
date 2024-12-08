@@ -29,11 +29,13 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// Logging Middleware
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
+// Route Handlers
 app.use("/api/auth", authRoutes);
 app.use("/api/beats", beatRoutes);
 app.use("/api/payments", paymentRoutes);
@@ -43,19 +45,18 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
 app.use("/checkout", paymentRoutes);
 
+// MongoDB Connection
 mongoose
   .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => {
-    console.log("Database connected");
-  })
+  .then(() => console.log("Database connected"))
   .catch((err) => {
     console.error("Database connection error:", err);
   });
 
-// Global error handling middleware
+// Global Error Handler
 app.use((err, req, res, next) => {
   console.error("Global error handler:", err.stack);
   res.status(err.status || 500).json({

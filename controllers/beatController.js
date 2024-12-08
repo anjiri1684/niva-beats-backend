@@ -11,14 +11,18 @@ exports.uploadBeat = async (req, res) => {
       return res.status(400).json({ message: "Audio file is required!" });
     }
 
+    const audioFile = req.files.audioFile[0];
     const audioFilePath = `${req.protocol}://${req.get("host")}/uploads/audio/${
-      req.files.audioFile[0].filename
+      audioFile.filename
     }`;
-    const imageFilePath = req.files.image
-      ? `${req.protocol}://${req.get("host")}/uploads/images/${
-          req.files.image[0].filename
-        }`
-      : null;
+
+    let imageFilePath = null;
+    if (req.files.image) {
+      const imageFile = req.files.image[0];
+      imageFilePath = `${req.protocol}://${req.get("host")}/uploads/images/${
+        imageFile.filename
+      }`;
+    }
 
     const beat = new Beat({
       title,
@@ -33,12 +37,10 @@ exports.uploadBeat = async (req, res) => {
     res.status(201).json({ message: "Beat uploaded successfully", beat });
   } catch (error) {
     console.error("Error uploading beat:", error.stack); // Log error stack
-    res
-      .status(500)
-      .json({
-        message: "Error uploading beat. Please try again.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error uploading beat. Please try again.",
+      error: error.message,
+    });
   }
 };
 

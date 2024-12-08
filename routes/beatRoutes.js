@@ -4,8 +4,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const Beat = require("../models/Beat");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Use your Stripe secret key
-const { createPaymentIntent } = require("./paymentRoutes"); // Import createPaymentIntent
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // Ensure Stripe is configured correctly
 
 // Configure Multer for file uploads
 const storage = multer.diskStorage({
@@ -13,7 +12,6 @@ const storage = multer.diskStorage({
     const folder = file.mimetype.startsWith("audio")
       ? "uploads/audio"
       : "uploads/images";
-
     // Ensure folder exists or create it
     fs.mkdirSync(folder, { recursive: true });
     cb(null, folder);
@@ -95,8 +93,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Checkout route
-// Route for creating a payment intent
+// Checkout route for creating a payment intent
 router.post("/create-payment-intent", async (req, res) => {
   const { beatIds } = req.body;
 
@@ -117,8 +114,11 @@ router.post("/create-payment-intent", async (req, res) => {
   const totalPrice = beats.reduce((sum, beat) => sum + beat.price, 0);
 
   try {
-    // Create payment intent
-    const paymentIntent = await createPaymentIntent(totalPrice);
+    // Create payment intent with Stripe
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: totalPrice * 100, // Convert to cents
+      currency: "usd", // Modify as needed for your currency
+    });
 
     // Return client secret and beats data to frontend
     res.status(200).json({
